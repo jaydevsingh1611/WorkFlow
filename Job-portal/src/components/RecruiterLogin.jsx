@@ -1,31 +1,69 @@
 import React, { useContext, useEffect, useState } from "react";
 import { assets } from "../assets/assets";
 import { AppContext } from "../context/AppContext";
+import axios from "axios"
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const RecruiterLogin = () => {
 
+    const navigate = useNavigate()
     const [state, setState] = useState("Login")
     const [name, setName] = useState("")
     const [password, setPassword] = useState('')
     const [email, setEmail] = useState('')
     const [image, setImage] = useState(false)
     const [isTextDataSubmitted, setIsTextDataSubmitted] = useState(false)
-    const { setShowRecruiterLogin } = useContext(AppContext)
+    const { setShowRecruiterLogin, backendUrl, setCompanyToken, setCompanyData } = useContext(AppContext)
 
-    const onSubmitHandler = async(e) => {
-    e.preventDefault()
-    if(state === "Sign Up" && !isTextDataSubmitted){
-    setIsTextDataSubmitted(true)
-    }
+    const onSubmitHandler = async (e) => {
+        e.preventDefault()
+        if (state === "Sign Up" && !isTextDataSubmitted) {
+            return setIsTextDataSubmitted(true)
+        }
+        try {
+            if (state === 'Login') {
+                const { data } = await axios.post(backendUrl + '/api/company/login', { email, password })
+                if (data.success) {
+                    setCompanyData(data.company)
+                    setCompanyToken(data.token)
+                    localStorage.setItem('companyToken', data.token)
+                    setShowRecruiterLogin(false)
+                    navigate('/dashboard')
+                } else {
+                    toast.error(data.message)
+                }
+            } else {
+                const formData = new FormData()
+                formData.append('name', name)
+                formData.append('password', password)
+                formData.append('email', email)
+                formData.append('image', image)
+
+                const { data } = await axios.post(backendUrl + '/api/company/register', formData)
+
+                if (data.success) {
+                    setCompanyData(data.company)
+                    setCompanyToken(data.token)
+                    localStorage.setItem('companyToken', data.token)
+                    setShowRecruiterLogin(false)
+                    navigate('/dashboard')
+                }else {
+                toast.error(data.message)
+                }
+            }
+        } catch (error) {
+        toast.error(data.message)
+        }
     }
 
     useEffect(() => {
-    document.body.style.overflow = 'hidden'
+        document.body.style.overflow = 'hidden'
 
-    return () => {
-        document.body.style.overflow = 'unset'
-    }
-    },[])
+        return () => {
+            document.body.style.overflow = 'unset'
+        }
+    }, [])
 
     return (
         <div className="absolute top-0 left-0 right-0 bottom-0 z-10 backdrop-blur-sm bg-black/30 flex justify-center items-center">
@@ -34,13 +72,13 @@ const RecruiterLogin = () => {
                 <p className="text-sm">Welcome back! Please sign in to continue.</p>
                 {state === 'Sign Up' && isTextDataSubmitted
                     ? <>
-                    <div className="flex items-center gap-4 my-10">
-                    <label htmlFor="image">
-                        <img className="w-16 rounded-full" src={image ? URL.createObjectURL(image) : assets.upload_area} alt="" />
-                        <input onChange={e => setImage(e.target.files[0])} type="file" id="image" hidden/>
-                    </label>
-                    <p>Upload Company <br/> logo</p>
-                    </div>
+                        <div className="flex items-center gap-4 my-10">
+                            <label htmlFor="image">
+                                <img className="w-16 rounded-full" src={image ? URL.createObjectURL(image) : assets.upload_area} alt="" />
+                                <input onChange={e => setImage(e.target.files[0])} type="file" id="image" hidden />
+                            </label>
+                            <p>Upload Company <br /> logo</p>
+                        </div>
                     </>
                     : <>
                         {state !== 'Login' && (
