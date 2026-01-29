@@ -1,7 +1,7 @@
 
 import React, { useContext } from "react";
 import { Route,Routes } from "react-router-dom";
-import ApplyJob from "./pages/Applyjob";
+import ApplyJob from "./pages/ApplyJob";
 import Applications from "./pages/Application";
 import Home from "./pages/Home";
 import RecruiterLogin from "./components/RecruiterLogin";

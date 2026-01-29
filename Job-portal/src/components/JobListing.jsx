@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import { assets, JobCategories, JobLocations } from "../assets/assets";
 import JobCard from "./JobCard";
-import { Divide } from "lucide-react";
 
 const JobListing = () => {
 
